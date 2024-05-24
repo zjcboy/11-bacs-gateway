@@ -2,7 +2,7 @@
 /*
 Plugin Name: 11 BACS Gateway
 Description: Customized version of the Bank Transfer Payment Gateway for WooCommerce.
-Version: 1.2.0
+Version: 1.3.2
 Author: 11 TEAM
 */
 
@@ -402,11 +402,11 @@ function custom_bacs_gateway_init() {
                                 'woocommerce_bacs_account_fields',
                                 array(
                                     'account_name'      => array(
-                                        'label' => __( 'Account name', 'woocommerce' ),
+                                        'label' => __( 'Beneficiary name', 'woocommerce' ),
                                         'value' => $bacs_account->account_name,
                                     ),
                                     'account_number' => array(
-                                        'label' => __( 'Account number', 'woocommerce' ),
+                                        'label' => __( 'Beneficiary account number', 'woocommerce' ),
                                         'value' => $bacs_account->account_number,
                                     ),
                                     'iban'   => array(
@@ -444,16 +444,16 @@ function custom_bacs_gateway_init() {
                                             $value .= ' (' . $field['value'] .'XXX * If 11 characters are required)';
                                         }
                                     }
-                                    $account_html .= '<div class="' . esc_attr( $field_key ) . '"><label>' . wp_kses_post( $field['label'] ) . ': </label>' . '<span>' . wp_kses_post( wptexturize( $field['value'] ) ) . '</span></div>' . PHP_EOL;
+                                    $account_html .= '<div class="' . esc_attr( $field_key ) . '"><label>' . wp_kses_post( $field['label'] ) . ': </label>' . '<span data-no-translation>' . wp_kses_post( wptexturize( $field['value'] ) ) . '</span></div>' . PHP_EOL;
                                     $has_details   = true;
                                 }
                                 
                             }
 
-                            $account_html .= '<div class="remark"><label>Remark:</label>' . '<div>' .$order->get_billing_first_name() .', #'.  $order_id   .'</div></div>';
+                            $account_html .= '<div class="remark"><label>Remark:</label>' . '<div data-no-translation>' .$order->get_billing_first_name() .', #'.  $order_id   .'</div></div>';
                             
                             if ($bacs_account -> sepa_qrcode == 'on' && !empty($bacs_account -> iban)) {
-                                $account_html .= '<div class="sepa-qrcode"><label>SEPA Qrcode:</label>' . '<div><img class="sepa-qrcode-img" src="'. $this->sepa_qrcode_url . '?recipientName='. $bacs_account->account_name . '&bic=' . $bacs_account->bic . '&iban=' . $bacs_account->iban . '&amount=' . $order->get_total() . '&paymentPurpose=' . $order->get_billing_first_name() .','.  $order_id . '&currency=EUR' .'"/>' . '<br /> <h6>To pay, scan this QR code using the bank app.</h6>
+                                $account_html .= '<div class="sepa-qrcode"><label>SEPA Qrcode:</label>' . '<div><img class="sepa-qrcode-img" src="'. $this->sepa_qrcode_url . '?recipientName='. $bacs_account->account_name . '&bic=' . $bacs_account->bic . '&iban=' . $bacs_account->iban . '&amount=' . $order->get_total() . '&paymentPurpose=' . $order->get_billing_first_name() .'-'.  $order_id . '&currency=EUR' .'"/>' . '<br /> <h6>To pay, scan this QR code using the bank app.</h6>
                                 <span>Or save the QR code to upload to your banking app.</span> </div></div>';
                             }
                             
@@ -591,5 +591,32 @@ function custom_bacs_gateway_init() {
         // For example, you can display a notice to the user or deactivate the plugin
         deactivate_plugins(plugin_basename(__FILE__));
         wp_die('This plugin requires WooCommerce to be installed and activated.');
+    }
+}
+
+
+
+
+
+// Hook into the admin_init action to check for plugin updates
+add_action('admin_init', 'check_for_plugin_update');
+
+function check_for_plugin_update() {
+    $plugin_data = get_plugin_data(__FILE__);
+    $plugin_version = $plugin_data['Version'];
+    $update_url = 'https://bacs-gateway-plugin.0079527.xyz/update-info.json'; // Update with your actual Cloudflare Pages URL
+
+    $response = wp_remote_get($update_url);
+    if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+        $update_info = json_decode(wp_remote_retrieve_body($response), true);
+
+        if (version_compare($plugin_version, $update_info['new_version'], '<')) {
+            add_action('admin_notices', function() use ($update_info) {
+                $download_url = $update_info['download_url'];
+                echo '<div class="notice notice-warning is-dismissible">
+                        <p>There is a new version of Custom BACS Gateway available. <a href="' . esc_url($download_url) . '" target="_blank">Download version ' . esc_html($update_info['new_version']) . '</a></p>
+                      </div>';
+            });
+        }
     }
 }
