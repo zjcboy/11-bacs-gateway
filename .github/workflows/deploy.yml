@@ -29,7 +29,7 @@ jobs:
 
       - name: Commit plugin zip file
         run: |
-          git config --local user.email "action@github.com"
+          git config --local user.email "jcboy@foxmail.com"
           git config --local user.name "GitHub Action"
           git add plugin.zip
           git commit -m "Add plugin zip file"
