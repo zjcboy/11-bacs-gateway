@@ -2,7 +2,7 @@
 /*
 Plugin Name: 11 BACS Gateway
 Description: Customized version of the Bank Transfer Payment Gateway for WooCommerce.
-Version: 1.3.2
+Version: 1.4.0
 Author: 11 TEAM
 */
 
