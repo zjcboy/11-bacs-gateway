@@ -31,7 +31,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add plugin.zip
+          git add your-plugin.zip
           git commit -m "Add plugin zip file"
           git push
 
@@ -44,7 +44,23 @@ jobs:
           mv update-info.json.tmp update-info.json
 
       - name: Commit update-info.json
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git add update-info.json
           git commit -m "Update update-info.json"
-          git push
+          git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/yourusername/your-repo.git HEAD:main
+
+      - name: Purge Cloudflare Cache
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          CF_EMAIL: ${{ secrets.CF_EMAIL }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }} # You need to add this secret as well, representing your Cloudflare Zone ID
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CF_ZONE_ID }}/purge_cache" \
+          -H "X-Auth-Email: $CF_EMAIL" \
+          -H "X-Auth-Key: $CF_API_KEY" \
+          -H "Content-Type: application/json" \
+          --data '{"purge_everything":true}'
