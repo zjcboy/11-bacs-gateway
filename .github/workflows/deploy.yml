@@ -1,0 +1,50 @@
+name: Deploy Plugin Update
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build plugin
+        run: npm run build
+
+      - name: Zip plugin
+        run: zip -r plugin.zip ./plugin
+
+      - name: Commit plugin zip file
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add plugin.zip
+          git commit -m "Add plugin zip file"
+          git push
+
+      - name: Update update-info.json
+        run: |
+          VERSION=$(date +%Y%m%d%H%M%S)
+          jq --arg version "$VERSION" '.new_version = $version' update-info.json > update-info.json.tmp
+          mv update-info.json.tmp update-info.json
+          jq --arg url "${{ secrets.CF_PAGES_URL }}/plugin.zip" '.download_url = $url' update-info.json > update-info.json.tmp
+          mv update-info.json.tmp update-info.json
+
+      - name: Commit update-info.json
+        run: |
+          git add update-info.json
+          git commit -m "Update update-info.json"
+          git push
