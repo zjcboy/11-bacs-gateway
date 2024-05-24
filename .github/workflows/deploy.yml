@@ -23,6 +23,23 @@ jobs:
           git add plugin.zip
           git commit -m "Add plugin zip file"
 
+      - name: Commit update-info.json
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --local user.email "jcboy@foxmail.com"
+          git config --local user.name "GitHub Action"
+          git add update-info.json
+          git commit -m "Update update-info.json"
+          git remote set-url origin git@github.com:zjcboy/11-bacs-gateway.git
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa" git push origin HEAD:main
+          git push https://github.com/zjcboy/11-bacs-gateway.git HEAD:main
+
+
       - name: Purge Cloudflare Cache
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
