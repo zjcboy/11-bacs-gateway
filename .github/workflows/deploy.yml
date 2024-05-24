@@ -16,14 +16,7 @@ jobs:
       - name: Zip plugin
         run: zip -r plugin.zip ./plugin
 
-      - name: Commit plugin zip file
-        run: |
-          git config --local user.email "jcboy@foxmail.com"
-          git config --local user.name "GitHub Action"
-          git add plugin.zip
-          git commit -m "Add plugin zip file"
-
-      - name: Commit update-info.json
+      - name: Set Ssh key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
@@ -33,11 +26,15 @@ jobs:
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           git config --local user.email "jcboy@foxmail.com"
           git config --local user.name "GitHub Action"
-          git add update-info.json
-          git commit -m "Update update-info.json"
           git remote set-url origin git@github.com:zjcboy/11-bacs-gateway.git
           GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa" git push origin HEAD:main
           git push https://github.com/zjcboy/11-bacs-gateway.git HEAD:main
+
+          
+      - name: Commit plugin zip file
+        run: |
+          git add plugin.zip
+          git commit -m "Add plugin zip file"
 
 
       - name: Purge Cloudflare Cache
