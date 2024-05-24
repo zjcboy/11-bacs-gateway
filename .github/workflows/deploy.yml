@@ -18,11 +18,11 @@ jobs:
         with:
           node-version: '14'
 
-      - name: Install dependencies
-        run: npm install
+      # - name: Install dependencies
+      #   run: npm install
 
-      - name: Build plugin
-        run: npm run build
+      # - name: Build plugin
+      #   run: npm run build
 
       - name: Zip plugin
         run: zip -r plugin.zip ./plugin
