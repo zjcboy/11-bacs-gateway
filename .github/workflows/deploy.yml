@@ -13,17 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # - name: Set up Node.js
-      #   uses: actions/setup-node@v2
-      #   with:
-      #     node-version: '14'
-
-      # - name: Install dependencies
-      #   run: npm install
-
-      # - name: Build plugin
-      #   run: npm run build
-
       - name: Zip plugin
         run: zip -r plugin.zip ./plugin
 
@@ -33,24 +22,6 @@ jobs:
           git config --local user.name "GitHub Action"
           git add plugin.zip
           git commit -m "Add plugin zip file"
-
-      - name: Update update-info.json
-        run: |
-          VERSION=$(date +%Y%m%d%H%M%S)
-          jq --arg version "$VERSION" '.new_version = $version' update-info.json > update-info.json.tmp
-          mv update-info.json.tmp update-info.json
-          jq --arg url "${{ secrets.CF_PAGES_URL }}/plugin.zip" '.download_url = $url' update-info.json > update-info.json.tmp
-          mv update-info.json.tmp update-info.json
-
-      - name: Commit update-info.json
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add update-info.json
-          git commit -m "Update update-info.json"
-          git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/zjcboy/11-bacs-gateway.git HEAD:main
 
       - name: Purge Cloudflare Cache
         env:
