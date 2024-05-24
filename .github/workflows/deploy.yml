@@ -31,9 +31,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add your-plugin.zip
+          git add plugin.zip
           git commit -m "Add plugin zip file"
-          git push
 
       - name: Update update-info.json
         run: |
@@ -51,7 +50,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add update-info.json
           git commit -m "Update update-info.json"
-          git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/yourusername/your-repo.git HEAD:main
+          git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/zjcboy/11-bacs-gateway.git HEAD:main
 
       - name: Purge Cloudflare Cache
         env:
